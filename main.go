@@ -23,7 +23,7 @@ type (
 	}
 	Driver struct { // driver -> intermediary between project & db
 		mutex   sync.Mutex
-		mutexes map[string]*sync.Mutex // string -> contains pointer to sync.Mutex
+		mutexes map[string]*sync.Mutex // string(name) -> contains pointer to a Mutex
 		dir     string
 		log     Logger
 	}
@@ -73,13 +73,16 @@ func (d *Driver) Write(collection, resource string, v interface{}) error {
 	tmpPath := fnlPath + ".tmp"
 	b, err := json.MarshalIndent(v, "", "\t")
 	if err != nil {
+		fmt.Println("err in write func\n")
 		return err
 	}
 	if err := os.MkdirAll(dir, 0755); err != nil {
+		fmt.Println("err in write func while creating dir\n")
 		return err
 	}
 	b = append(b, byte('\n'))
 	if err := os.WriteFile(tmpPath, b, 0644); err != nil {
+		fmt.Println("err in write func while writing onto tmpPath\n")
 		return err
 	}
 	return os.Rename(tmpPath, fnlPath) //these are not functions,but struct methods
@@ -87,12 +90,6 @@ func (d *Driver) Write(collection, resource string, v interface{}) error {
 
 func (d *Driver) Delete(collection, resource string) error {
 
-	if collection == "" {
-		return fmt.Errorf("Missing collection - no place to delete record from!")
-	}
-	if resource == "" {
-		return fmt.Errorf("Missing resource - unable to delete record (no name)")
-	}
 	path := filepath.Join(collection, resource)
 	mutex := d.getOrCreateMutex(collection)
 	mutex.Lock()
@@ -101,7 +98,7 @@ func (d *Driver) Delete(collection, resource string) error {
 	dir := filepath.Join(d.dir, path)
 	switch fi, err := stat(dir); {
 	case fi == nil, err != nil:
-		return fmt.Errorf("unable to find file/directory name %v\n", path)
+		return fmt.Errorf("unable to find file/directory name %v", path)
 	case fi.Mode().IsDir():
 		return os.RemoveAll(dir)
 	case fi.Mode().IsRegular():
@@ -158,11 +155,12 @@ func (d *Driver) getOrCreateMutex(collection string) *sync.Mutex {
 	return m
 }
 
-func stat(path string) (fi os.FileInfo, err error) {
-	fi, err = os.Stat(path)
+func stat(path string) (fi os.FileInfo, err error) { // Will check for both "path" and "path.json"
+	fi, err = os.Stat(path) //first attempt to check with path
 	if os.IsNotExist(err) {
 		fi, err = os.Stat(path + ".json") //checks for the file with .json extension
 		if err != nil {
+			fmt.Println("stat func didnot find the path/path.json ->", path)
 			return nil, err
 		}
 	}
@@ -195,7 +193,7 @@ func main() {
 	dir := "./"
 	db, err := New(dir, nil)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println("Error while creating new directory: ", err)
 	}
 	employees := []User{{
 		"John", "34", "6003567434", "Deutsche Bank", Address{"Pune", "Maha", "India", "781394"},
@@ -224,22 +222,27 @@ func main() {
 	fmt.Println(records)
 	allUsers := []User{}
 	for _, f := range records {
-		employeeFound := []User{}
+		employeeFound := User{}
 		if err := json.Unmarshal([]byte(f), &employeeFound); err != nil {
-			fmt.Println("error -> ", err)
+			fmt.Println("error while reading -> ", err)
 		}
-		allUsers = append(allUsers, employeeFound...)
+		allUsers = append(allUsers, employeeFound)
 	}
-	fmt.Println(allUsers)
+	fmt.Println((allUsers))
 
 	if err := db.Delete("users", "Ashlie"); err != nil {
 		fmt.Println("error while deleting -> ", err)
 	}
 	// delete one user
 
-	// if err := db.Delete("users", ""); err != nil {
-	// 	fmt.Println("error while deleting -> ", err)
-	// }
-	//delete all users
+	if err := db.Delete("users", "Sam"); err != nil {
+		fmt.Println("error while deleting -> ", err)
+	}
+	/*
+		if err := db.Delete("users", ""); err != nil {
+			fmt.Println("error while deleting -> ", err)
+		}
+		//delete all users
+	*/
 
 }
