@@ -243,12 +243,14 @@ func main() {
 		fmt.Println("error while deleting -> ", err)
 	}
 
+	var nameToSearch string = "John"
 	var recordFound User
-	err = db.Read("users", "John", &recordFound)
+	err = db.Read("users", nameToSearch, &recordFound)
 	if err != nil {
-		fmt.Println("err while searching for a name ->", err)
+		fmt.Println("err while searching for name ->", nameToSearch)
+		fmt.Print(err)
 	} else if err == nil {
-		fmt.Println("User with name found")
+		fmt.Println("User with name->", nameToSearch, "found")
 	}
 	/*
 		if err := db.Delete("users", ""); err != nil {
