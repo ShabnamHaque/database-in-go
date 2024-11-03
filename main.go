@@ -195,15 +195,19 @@ func main() {
 	if err != nil {
 		fmt.Println("Error while creating new directory: ", err)
 	}
-	employees := []User{{
-		"John", "34", "6003567434", "Deutsche Bank", Address{"Pune", "Maha", "India", "781394"},
-	}, {
-		"Ashlie", "23", "6006567434", "Axis Bank", Address{"New Delhi", "Delhi", "India", "781994"},
-	}, {
-		"Christy", "34", "6089567434", "Deutsche Bank", Address{"Pune", "Maha", "India", "781394"},
-	}, {
-		"Paul", "34", "9089567434", "HDFC Bank", Address{"Pune", "Maha", "India", "781394"},
-	},
+	employees := []User{
+		// 	{
+		// 	"John", "34", "6003567434", "Deutsche Bank", Address{"Pune", "Maha", "India", "781394"},
+		// },
+		//  {
+		// 	"Ashlie", "23", "6006567434", "Axis Bank", Address{"New Delhi", "Delhi", "India", "781994"},
+		// },
+		{
+			"Bonnie", "54", "70699473849", "ICICI Bank", Address{"Pune", "Maha", "India", "781394"},
+		},
+		// {
+		//	"Paul", "34", "9089567434", "HDFC Bank", Address{"Pune", "Maha", "India", "781394"},
+		//},
 	}
 	for _, value := range employees {
 		db.Write("users", value.Name, User{
@@ -240,7 +244,7 @@ func main() {
 	}
 
 	var recordFound User
-	err = db.Read("users", "Ash", &recordFound)
+	err = db.Read("users", "John", &recordFound)
 	if err != nil {
 		fmt.Println("err while searching for a name ->", err)
 	} else if err == nil {
