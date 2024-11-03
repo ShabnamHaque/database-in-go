@@ -1,4 +1,4 @@
-This is a **mongoDB like database** constructed from scratch.
+This is a **mongoDB like database** built from scratch in **GO**.
 
 1. Data integrity ensured
 2. Mutexes used
