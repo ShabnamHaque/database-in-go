@@ -22,8 +22,8 @@ type (
 		Trace(string, ...interface{})
 	}
 	Driver struct { // driver -> intermediary between project & db
-		mutex   sync.Mutex
-		mutexes map[string]*sync.Mutex // string(name) -> contains pointer to a Mutex
+		//mutex   sync.Mutex
+		mutexes map[string]*sync.Mutex // string(name) mapped to the pointer to a Mutex
 		dir     string
 		log     Logger
 	}
@@ -59,10 +59,10 @@ func New(dir string, options *Options) (*Driver, error) {
 }
 func (d *Driver) Write(collection, resource string, v interface{}) error {
 	if collection == "" {
-		return fmt.Errorf("Missing collection - no place to save record!")
+		return fmt.Errorf("missing collection - no place to save record")
 	}
 	if resource == "" {
-		return fmt.Errorf("Missing resource - no place to save record (no name)")
+		return fmt.Errorf("missing resource - no place to save record (no name)")
 	}
 	mutex := d.getOrCreateMutex(collection)
 	mutex.Lock() //locked until write func completed
@@ -73,16 +73,16 @@ func (d *Driver) Write(collection, resource string, v interface{}) error {
 	tmpPath := fnlPath + ".tmp"
 	b, err := json.MarshalIndent(v, "", "\t")
 	if err != nil {
-		fmt.Println("err in write func\n")
+		fmt.Println("err in write func")
 		return err
 	}
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		fmt.Println("err in write func while creating dir\n")
+		fmt.Println("err in write func while creating dir")
 		return err
 	}
 	b = append(b, byte('\n'))
 	if err := os.WriteFile(tmpPath, b, 0644); err != nil {
-		fmt.Println("err in write func while writing onto tmpPath\n")
+		fmt.Println("err in write func while writing onto tmpPath")
 		return err
 	}
 	return os.Rename(tmpPath, fnlPath) //these are not functions,but struct methods
@@ -109,10 +109,10 @@ func (d *Driver) Delete(collection, resource string) error {
 }
 func (d *Driver) Read(collection, resource string, v interface{}) error {
 	if collection == "" {
-		return fmt.Errorf("Missing collection - no place to read record!")
+		return fmt.Errorf("missing collection - no place to read record")
 	}
 	if resource == "" {
-		return fmt.Errorf("Missing resource - unable to read record (no name)")
+		return fmt.Errorf("missing resource - unable to read record (no name)")
 	}
 	record := filepath.Join(d.dir, collection, resource)
 	if _, err := stat(record); err != nil {
@@ -127,7 +127,7 @@ func (d *Driver) Read(collection, resource string, v interface{}) error {
 
 func (d *Driver) ReadAll(collection string) ([]string, error) {
 	if collection == "" {
-		return nil, fmt.Errorf("Missing collection!")
+		return nil, fmt.Errorf("missing collection")
 	}
 	dir := filepath.Join(d.dir, collection)
 	if _, err := stat(dir); err != nil {
@@ -146,11 +146,11 @@ func (d *Driver) ReadAll(collection string) ([]string, error) {
 	return records, nil
 }
 
-func (d *Driver) getOrCreateMutex(collection string) *sync.Mutex {
-	m, ok := d.mutexes[collection]
+func (d *Driver) getOrCreateMutex(collectionName string) *sync.Mutex {
+	m, ok := d.mutexes[collectionName]
 	if !ok {
 		m = &sync.Mutex{}
-		d.mutexes[collection] = m
+		d.mutexes[collectionName] = m
 	}
 	return m
 }
