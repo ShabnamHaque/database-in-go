@@ -203,7 +203,7 @@ func main() {
 		// 	"Ashlie", "23", "6006567434", "Axis Bank", Address{"New Delhi", "Delhi", "India", "781994"},
 		// },
 		{
-			"Bonnie", "54", "70699473849", "ICICI Bank", Address{"Pune", "Maha", "India", "781394"},
+			"Bonnie", "54", "70699893849", "ICICI Bank", Address{"Pune", "Maha", "India", "781394"},
 		},
 		// {
 		//	"Paul", "34", "9089567434", "HDFC Bank", Address{"Pune", "Maha", "India", "781394"},
@@ -232,25 +232,29 @@ func main() {
 		}
 		allUsers = append(allUsers, employeeFound)
 	}
-	fmt.Println((allUsers))
+
+	for _, item := range allUsers {
+		fmt.Println(item)
+	}
+	fmt.Print("<----------------------------->\n")
 
 	if err := db.Delete("users", "Ashlie"); err != nil {
-		fmt.Println("error while deleting -> ", err)
+		fmt.Println("\nerror while deleting -> ", err)
 	}
 	// delete one user
 
 	if err := db.Delete("users", "Sam"); err != nil {
-		fmt.Println("error while deleting -> ", err)
+		fmt.Println("\nerror while deleting -> ", err)
 	}
 
 	var nameToSearch string = "John"
 	var recordFound User
 	err = db.Read("users", nameToSearch, &recordFound)
 	if err != nil {
-		fmt.Println("err while searching for name ->", nameToSearch)
+		fmt.Println("\nerr while searching for name ->", nameToSearch)
 		fmt.Print(err)
-	} else if err == nil {
-		fmt.Println("User with name->", nameToSearch, "found")
+	} else {
+		fmt.Println("\nUser with name->", nameToSearch, "found")
 	}
 	/*
 		if err := db.Delete("users", ""); err != nil {
